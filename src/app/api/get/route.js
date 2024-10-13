@@ -1,9 +1,10 @@
 import { NextResponse } from 'next/server';
 import Data from '../../../lib/model/Data';
 
-export async function GET(req) {
+export async function GET(request) {
   try {
-    const { searchParams } = new URL(req.url);
+    const url = new URL(request.nextUrl);
+    const searchParams = url.searchParams;
     const id = searchParams.get('id');
 
     if (!id) {
