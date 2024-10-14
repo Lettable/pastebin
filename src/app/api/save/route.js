@@ -1,8 +1,15 @@
 import { NextResponse } from 'next/server';
 import Data from '../../../lib/model/Data';
+import mongoose from 'mongoose';
+import { connectDB } from '../../lib/config/Database';
 
 export async function POST(req) {
     try {
+      const isAlreadyConnected = mongoose.connection.readyState >= 1;
+
+      if (!isAlreadyConnected) {
+        await connectDB();
+      }
       const { content, language } = await req.json();
   
       const newData = new Data({
