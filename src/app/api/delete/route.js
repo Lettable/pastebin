@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import Data from '../../../lib/model/Data';
 import mongoose from 'mongoose';
-import { connectDB } from '../../lib/config/Database';
+import { connectDB } from '../../../lib/config/Database';
 
 export async function DELETE(req) {
   try {
