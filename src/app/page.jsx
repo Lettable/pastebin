@@ -1,12 +1,13 @@
 "use client"
 
-import { useRouter } from "next/navigation";
+import { useRouter } from "next/navigation"
 import React, { useState, useRef } from 'react'
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { Save, FilePlus, Download, Copy, AlertCircleIcon } from 'lucide-react'
+import { Save, FilePlus, Download, Copy, AlertCircle, Menu } from 'lucide-react'
 import { Editor } from '@monaco-editor/react'
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 
 const languages = [
   { value: 'plaintext', label: 'Plain Text' },
@@ -27,7 +28,7 @@ export default function WebIDE() {
   const [content, setContent] = useState('')
   const [language, setLanguage] = useState('plaintext')
   const editorRef = useRef(null)
-  const router = useRouter();
+  const router = useRouter()
 
   const handleEditorDidMount = (editor) => {
     editorRef.current = editor
@@ -42,10 +43,9 @@ export default function WebIDE() {
   }
 
   const handleSave = async () => {
-
     if (!content.trim()) {
-      alert("You can't store a blank page.");
-      return;
+      alert("You can't store a blank page.")
+      return
     }
 
     try {
@@ -58,27 +58,25 @@ export default function WebIDE() {
           content: content,
           language: language,
         }),
-      });
+      })
 
       if (!response.ok) {
-        throw new Error(`Error: ${response.status}`);
+        throw new Error(`Error: ${response.status}`)
       }
 
-      const result = await response.json();
+      const result = await response.json()
 
-      const objectId = result.objectId;
+      const objectId = result.objectId
       alert(`Saved successfully with ID: ${objectId}`)
-      router.push(`/paste?id=${objectId}`);
+      router.push(`/paste?id=${objectId}`)
     } catch (error) {
-      console.error('Error saving content:', error);
+      console.error('Error saving content:', error)
     }
-  };
-
-
+  }
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(content);
-    alert("Paste copied to clipboard!");
+    navigator.clipboard.writeText(content)
+    alert("Paste copied to clipboard!")
   }
 
   const handleAbout = () => {
@@ -86,51 +84,103 @@ export default function WebIDE() {
   }
 
   const handleDownload = () => {
-    const blob = new Blob([content], { type: "text/plain" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${language}.txt`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  };
+    const blob = new Blob([content], { type: "text/plain" })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement("a")
+    a.href = url
+    a.download = `${language}.txt`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+  }
+
+  const LeftSideButtons = () => (
+    <>
+      <Button variant="ghost" className="text-gray-300 hover:text-white hover:bg-[#3c3c3c]" onClick={handleNew}>
+        <FilePlus className="mr-2 h-4 w-4" /> <span className="hidden sm:inline">New</span>
+      </Button>
+      <Button variant="ghost" className="text-gray-300 hover:text-white hover:bg-[#3c3c3c]" onClick={handleSave}>
+        <Save className="mr-2 h-4 w-4" /> <span className="hidden sm:inline">Save</span>
+      </Button>
+      <Select value={language} onValueChange={handleLanguageChange}>
+        <SelectTrigger className="w-[120px] sm:w-[180px] bg-[#3c3c3c] border-[#6c6c6c] text-gray-300">
+          <SelectValue placeholder="Language" />
+        </SelectTrigger>
+        <SelectContent>
+          {languages.map((lang) => (
+            <SelectItem key={lang.value} value={lang.value}>
+              {lang.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </>
+  )
+
+  const RightSideButtons = () => (
+    <>
+      <Button variant="ghost" className="text-gray-300 hover:text-white hover:bg-[#3c3c3c]" onClick={handleCopy}>
+        <Copy className="mr-2 h-4 w-4" /> <span className="hidden sm:inline">Copy</span>
+      </Button>
+      <Button variant="ghost" className="text-gray-300 hover:text-white hover:bg-[#3c3c3c]" onClick={handleDownload}>
+        <Download className="mr-2 h-4 w-4" /> <span className="hidden sm:inline">Download</span>
+      </Button>
+      <Button variant="ghost" className="text-gray-300 hover:text-white hover:bg-[#3c3c3c]" onClick={handleAbout}>
+        <AlertCircle className="mr-2 h-4 w-4" /> <span className="hidden sm:inline">About</span>
+      </Button>
+    </>
+  )
 
   return (
     <div className="min-h-screen bg-[#1e1e1e] text-gray-300 flex flex-col">
       {/* Top Bar */}
       <div className="flex justify-between items-center p-2 bg-[#252526] border-b border-[#3c3c3c]">
-        <div className="flex space-x-2">
-          <Button variant="ghost" className="text-gray-300 hover:text-white hover:bg-[#3c3c3c]" onClick={handleNew}>
-            <FilePlus className="mr-2 h-4 w-4" /> New
-          </Button>
-          <Button variant="ghost" className="text-gray-300 hover:text-white hover:bg-[#3c3c3c]" onClick={handleSave}>
-            <Save className="mr-2 h-4 w-4" /> Save
-          </Button>
-          <Select value={language} onValueChange={handleLanguageChange}>
-            <SelectTrigger className="w-[180px] bg-[#3c3c3c] border-[#6c6c6c] text-gray-300">
-              <SelectValue placeholder="Select Language" />
-            </SelectTrigger>
-            <SelectContent>
-              {languages.map((lang) => (
-                <SelectItem key={lang.value} value={lang.value}>
-                  {lang.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+        <div className="hidden sm:flex space-x-2">
+          <LeftSideButtons />
         </div>
-        <div className="flex items-center space-x-2">
-          <Button variant="ghost" className="text-gray-300 hover:text-white hover:bg-[#3c3c3c]" onClick={handleCopy}>
-            <Copy className="mr-2 h-4 w-4" /> Copy
-          </Button>
-          <Button variant="ghost" className="text-gray-300 hover:text-white hover:bg-[#3c3c3c]" onClick={handleDownload}>
-            <Download className="mr-2 h-4 w-4" /> Download
-          </Button>
-          <Button variant="ghost" className="text-gray-300 hover:text-white hover:bg-[#3c3c3c]" onClick={handleAbout}>
-            <AlertCircleIcon className="mr-2 h-4 w-4" /> About
-          </Button>
+        <div className="sm:hidden">
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon" className="text-gray-300 hover:text-white hover:bg-[#3c3c3c]">
+                <Menu className="h-5 w-5" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="left" className="w-[250px] sm:w-[300px] bg-[#252526] text-gray-300 border-r border-[#3c3c3c]">
+              <nav className="flex flex-col space-y-4 mt-4">
+                <Button variant="ghost" className="justify-start text-gray-300 hover:text-white hover:bg-[#3c3c3c]" onClick={handleNew}>
+                  <FilePlus className="mr-2 h-4 w-4" /> New
+                </Button>
+                <Button variant="ghost" className="justify-start text-gray-300 hover:text-white hover:bg-[#3c3c3c]" onClick={handleSave}>
+                  <Save className="mr-2 h-4 w-4" /> Save
+                </Button>
+                <Select value={language} onValueChange={handleLanguageChange}>
+                  <SelectTrigger className="w-full bg-[#3c3c3c] border-[#6c6c6c] text-gray-300">
+                    <SelectValue placeholder="Language" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {languages.map((lang) => (
+                      <SelectItem key={lang.value} value={lang.value}>
+                        {lang.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Button variant="ghost" className="justify-start text-gray-300 hover:text-white hover:bg-[#3c3c3c]" onClick={handleCopy}>
+                  <Copy className="mr-2 h-4 w-4" /> Copy
+                </Button>
+                <Button variant="ghost" className="justify-start text-gray-300 hover:text-white hover:bg-[#3c3c3c]" onClick={handleDownload}>
+                  <Download className="mr-2 h-4 w-4" /> Download
+                </Button>
+                <Button variant="ghost" className="justify-start text-gray-300 hover:text-white hover:bg-[#3c3c3c]" onClick={handleAbout}>
+                  <AlertCircle className="mr-2 h-4 w-4" /> About
+                </Button>
+              </nav>
+            </SheetContent>
+          </Sheet>
+        </div>
+        <div className="hidden sm:flex space-x-2">
+          <RightSideButtons />
         </div>
       </div>
 
@@ -151,6 +201,8 @@ export default function WebIDE() {
             scrollBeyondLastLine: false,
             readOnly: false,
             automaticLayout: true,
+            wordWrap: 'on',
+            wrappingStrategy: 'advanced',
           }}
           onMount={(editor) => handleEditorDidMount(editor)}
         />

@@ -5,8 +5,9 @@ import { Suspense, useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Save, FilePlus, Download, Copy, Delete, AlertCircleIcon } from "lucide-react";
+import { Save, FilePlus, Download, Copy, Delete, AlertCircle, Menu } from "lucide-react";
 import { Editor } from "@monaco-editor/react";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
 const languages = [
   { value: "plaintext", label: "Plain Text" },
@@ -184,43 +185,98 @@ const GetSearchParams = ({ router }) => {
     fetchContent();
   }, [objectId]);
 
+  const LeftSideButtons = () => (
+    <>
+      <Button variant="ghost" className="text-gray-300 hover:text-white hover:bg-[#3c3c3c]" onClick={handleNew}>
+        <FilePlus className="mr-2 h-4 w-4" /> <span className="hidden sm:inline">New</span>
+      </Button>
+      <Button variant="ghost" className="text-gray-300 hover:text-white hover:bg-[#3c3c3c]" onClick={objectId ? handleUpdate : handleSave}>
+        <Save className="mr-2 h-4 w-4" /> <span className="hidden sm:inline">{objectId ? 'Update' : 'Save'}</span>
+      </Button>
+      <Button variant="ghost" className="text-gray-300 hover:text-white hover:bg-[#3c3c3c]" onClick={handleDelete}>
+        <Delete className="mr-2 h-4 w-4" /> <span className="hidden sm:inline">Delete</span>
+      </Button>
+      <Select value={language} onValueChange={handleLanguageChange}>
+        <SelectTrigger className="w-[120px] sm:w-[180px] bg-[#3c3c3c] border-[#6c6c6c] text-gray-300">
+          <SelectValue placeholder="Language" />
+        </SelectTrigger>
+        <SelectContent>
+          {languages.map((lang) => (
+            <SelectItem key={lang.value} value={lang.value}>
+              {lang.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </>
+  )
+
+  const RightSideButtons = () => (
+    <>
+      <Button variant="ghost" className="text-gray-300 hover:text-white hover:bg-[#3c3c3c]" onClick={handleCopy}>
+        <Copy className="mr-2 h-4 w-4" /> <span className="hidden sm:inline">Copy</span>
+      </Button>
+      <Button variant="ghost" className="text-gray-300 hover:text-white hover:bg-[#3c3c3c]" onClick={handleDownload}>
+        <Download className="mr-2 h-4 w-4" /> <span className="hidden sm:inline">Download</span>
+      </Button>
+      <Button variant="ghost" className="text-gray-300 hover:text-white hover:bg-[#3c3c3c]" onClick={handleAbout}>
+        <AlertCircle className="mr-2 h-4 w-4" /> <span className="hidden sm:inline">About</span>
+      </Button>
+    </>
+  )
+
   return (
     <div className="min-h-screen bg-[#1e1e1e] text-gray-300 flex flex-col">
       {/* Top Bar */}
       <div className="flex justify-between items-center p-2 bg-[#252526] border-b border-[#3c3c3c]">
-        <div className="flex space-x-2">
-          <Button variant="ghost" className="text-gray-300 hover:text-white hover:bg-[#3c3c3c]" onClick={handleNew}>
-            <FilePlus className="mr-2 h-4 w-4" /> New
-          </Button>
-          <Button variant="ghost" className="text-gray-300 hover:text-white hover:bg-[#3c3c3c]" onClick={objectId ? handleUpdate : handleSave}>
-            <Save className="mr-2 h-4 w-4" /> {objectId ? 'Update' : 'Save'}
-          </Button>
-          <Button variant="ghost" className="text-gray-300 hover:text-white hover:bg-[#3c3c3c]" onClick={handleDelete}>
-            <Delete className="mr-2 h-4 w-4" /> Delete
-          </Button>
-          <Select value={language} onValueChange={handleLanguageChange}>
-            <SelectTrigger className="w-[180px] bg-[#3c3c3c] border-[#6c6c6c] text-gray-300">
-              <SelectValue placeholder="Select Language" />
-            </SelectTrigger>
-            <SelectContent>
-              {languages.map((lang) => (
-                <SelectItem key={lang.value} value={lang.value}>
-                  {lang.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+        <div className="hidden sm:flex space-x-2">
+          <LeftSideButtons />
         </div>
-        <div className="flex items-center space-x-2">
-          <Button variant="ghost" className="text-gray-300 hover:text-white hover:bg-[#3c3c3c]" onClick={handleCopy}>
-            <Copy className="mr-2 h-4 w-4" /> Copy
-          </Button>
-          <Button variant="ghost" className="text-gray-300 hover:text-white hover:bg-[#3c3c3c]" onClick={handleDownload}>
-            <Download className="mr-2 h-4 w-4" /> Download
-          </Button>
-          <Button variant="ghost" className="text-gray-300 hover:text-white hover:bg-[#3c3c3c]" onClick={handleAbout}>
-            <AlertCircleIcon className="mr-2 h-4 w-4" /> About
-          </Button>
+        <div className="sm:hidden">
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon" className="text-gray-300 hover:text-white hover:bg-[#3c3c3c]">
+                <Menu className="h-5 w-5" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="left" className="w-[250px] sm:w-[300px] bg-[#252526] text-gray-300 border-r border-[#3c3c3c]">
+              <nav className="flex flex-col space-y-4 mt-4">
+                <Button variant="ghost" className="justify-start text-gray-300 hover:text-white hover:bg-[#3c3c3c]" onClick={handleNew}>
+                  <FilePlus className="mr-2 h-4 w-4" /> New
+                </Button>
+                <Button variant="ghost" className="justify-start text-gray-300 hover:text-white hover:bg-[#3c3c3c]" onClick={objectId ? handleUpdate : handleSave}>
+                  <Save className="mr-2 h-4 w-4" /> {objectId ? 'Update' : 'Save'}
+                </Button>
+                <Button variant="ghost" className="justify-start text-gray-300 hover:text-white hover:bg-[#3c3c3c]" onClick={handleDelete}>
+                  <Delete className="mr-2 h-4 w-4" /> Delete
+                </Button>
+                <Select value={language} onValueChange={handleLanguageChange}>
+                  <SelectTrigger className="w-full bg-[#3c3c3c] border-[#6c6c6c] text-gray-300">
+                    <SelectValue placeholder="Language" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {languages.map((lang) => (
+                      <SelectItem key={lang.value} value={lang.value}>
+                        {lang.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Button variant="ghost" className="justify-start text-gray-300 hover:text-white hover:bg-[#3c3c3c]" onClick={handleCopy}>
+                  <Copy className="mr-2 h-4 w-4" /> Copy
+                </Button>
+                <Button variant="ghost" className="justify-start text-gray-300 hover:text-white hover:bg-[#3c3c3c]" onClick={handleDownload}>
+                  <Download className="mr-2 h-4 w-4" /> Download
+                </Button>
+                <Button variant="ghost" className="justify-start text-gray-300 hover:text-white hover:bg-[#3c3c3c]" onClick={handleAbout}>
+                  <AlertCircle className="mr-2 h-4 w-4" /> About
+                </Button>
+              </nav>
+            </SheetContent>
+          </Sheet>
+        </div>
+        <div className="hidden sm:flex space-x-2">
+          <RightSideButtons />
         </div>
       </div>
 
@@ -244,6 +300,8 @@ const GetSearchParams = ({ router }) => {
               scrollBeyondLastLine: false,
               readOnly: false,
               automaticLayout: true,
+              wordWrap: 'on',
+              wrappingStrategy: 'advanced',
             }}
             onMount={(editor) => handleEditorDidMount(editor)}
           />
